@@ -57,7 +57,8 @@ class Requests(private val appSettings: AppSettings) {
             agent = "Kai/${Version.appVersion} ($platformName)"
         }
         install(HttpTimeout) {
-            requestTimeoutMillis = 60.seconds.inWholeMilliseconds
+            // Ось головна зміна: тепер беремо значення з налаштувань користувача
+            requestTimeoutMillis = appSettings.getRequestTimeout().seconds.inWholeMilliseconds
         }
         install(Logging) {
             if (isDebugBuild) {
