@@ -148,10 +148,16 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     uiState: SettingsUiState,
     onNavigateBack: () -> Unit = {},
-    timeoutSeconds: Int = 30, 
-    onChangeTimeout: (Int) -> Unit = {}
 ) {
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).navigationBarsPadding().statusBarsPadding().imePadding(), horizontalAlignment = CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .navigationBarsPadding()
+            .statusBarsPadding()
+            .imePadding(),
+        horizontalAlignment = CenterHorizontally
+    ) {
         TopBar(onNavigateBack = onNavigateBack)
 
         SettingsTabSelector(
@@ -164,7 +170,11 @@ fun SettingsScreenContent(
         }
 
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp).widthIn(max = 500.dp),
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+                .widthIn(max = 500.dp),
             horizontalAlignment = CenterHorizontally,
         ) {
             Spacer(Modifier.height(16.dp))
@@ -174,6 +184,8 @@ fun SettingsScreenContent(
                     GeneralContent(
                         showTopics = uiState.showTopics,
                         onToggleShowTopics = uiState.onToggleShowTopics,
+                        timeoutSeconds = uiState.timeoutSeconds,
+                        onChangeTimeout = uiState.onChangeTimeout
                     )
                 }
 
@@ -297,9 +309,7 @@ fun SettingsScreenContent(
             }
 
             Spacer(Modifier.height(16.dp))
-
             Spacer(Modifier.weight(1f))
-
             BottomInfo()
         }
     }
@@ -452,8 +462,7 @@ private fun FreeSettings() {
                 onClick = {
                     uriHandler.openUri("https://schubert-simon.de")
                 },
-                Modifier
-                    .pointerHoverIcon(PointerIcon.Hand),
+                Modifier.pointerHoverIcon(PointerIcon.Hand),
             ) {
                 Text(stringResource(Res.string.settings_contact_sponsorship))
             }
@@ -476,8 +485,10 @@ private fun ServiceSettings(
     testTag: String? = null,
 ) {
     var apiKeyFocused by remember { mutableStateOf(false) }
+    
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .let { if (testTag != null) it.testTag(testTag) else it }
             .onFocusChanged { apiKeyFocused = it.isFocused },
         value = apiKey,
@@ -514,7 +525,6 @@ private fun ServiceSettings(
     Spacer(Modifier.height(8.dp))
 
     val linkColor = MaterialTheme.colorScheme.primary
-
     val copyApiKeyPromptString = stringResource(Res.string.settings_sign_in_copy_api_key_from)
     val annotatedString = remember(apiKeyUrl, apiKeyUrlDisplay) {
         buildAnnotatedString {
@@ -527,6 +537,7 @@ private fun ServiceSettings(
             }
         }
     }
+    
     Text(
         annotatedString,
         modifier = Modifier.fillMaxWidth(),
@@ -535,16 +546,17 @@ private fun ServiceSettings(
 
     Spacer(Modifier.height(16.dp))
 
-    if (connectionStatus == ConnectionStatus.Connected) {
+    // Model selection (visible only when connected)
+    if (connectionStatus == ConnectionStatus.Connected && models.isNotEmpty()) {
         ModelSelection(selectedModel, models, onSelectModel)
-        
         Spacer(Modifier.height(24.dp))
-        
-        TimeoutSlider(
-            timeoutSeconds = timeoutSeconds,
-            onChangeTimeout = onChangeTimeout
-        )
     }
+
+    // Timeout slider - завжди видимий
+    TimeoutSlider(
+        timeoutSeconds = timeoutSeconds,
+        onChangeTimeout = onChangeTimeout
+    )
 }
 
 @Composable
@@ -561,6 +573,7 @@ private fun OpenAICompatibleSettings(
     onChangeTimeout: (Int) -> Unit,
 ) {
     var baseUrlFocused by remember { mutableStateOf(false) }
+    
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
         value = baseUrl,
@@ -653,6 +666,7 @@ private fun OpenAICompatibleSettings(
             }
         }
     }
+    
     Text(
         annotatedString,
         modifier = Modifier.fillMaxWidth(),
@@ -661,16 +675,17 @@ private fun OpenAICompatibleSettings(
 
     Spacer(Modifier.height(16.dp))
 
-    if (connectionStatus == ConnectionStatus.Connected) {
+    // Model selection (visible only when connected)
+    if (connectionStatus == ConnectionStatus.Connected && models.isNotEmpty()) {
         ModelSelection(selectedModel, models, onSelectModel)
-        
         Spacer(Modifier.height(24.dp))
-        
-        TimeoutSlider(
-            timeoutSeconds = timeoutSeconds,
-            onChangeTimeout = onChangeTimeout
-        )
     }
+
+    // Timeout slider - завжди видимий
+    TimeoutSlider(
+        timeoutSeconds = timeoutSeconds,
+        onChangeTimeout = onChangeTimeout
+    )
 }
 
 @Composable
@@ -684,6 +699,7 @@ private fun OpenClawSettings(
     onChangeTimeout: (Int) -> Unit,
 ) {
     var baseUrlFocused by remember { mutableStateOf(false) }
+    
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
         value = gatewayUrl,
@@ -766,6 +782,7 @@ private fun OpenClawSettings(
             append("2. Add the following to ~/.openclaw/openclaw.json to enable the HTTP chat endpoint:\n")
         }
     }
+    
     Text(
         setupText,
         modifier = Modifier.fillMaxWidth(),
@@ -794,7 +811,7 @@ private fun OpenClawSettings(
     Spacer(Modifier.height(8.dp))
 
     Text(
-        text = "3. Use your server\u2019s Tailscale IP as the Gateway URL (e.g. http://<tailscale-ip>:18789).\n\n" +
+        text = "3. Use your server's Tailscale IP as the Gateway URL (e.g. http://<tailscale-ip>:18789).\n\n" +
             "4. Copy your token from gateway.auth.token in ~/.openclaw/openclaw.json and paste it above.",
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.bodySmall,
@@ -803,10 +820,41 @@ private fun OpenClawSettings(
     
     Spacer(Modifier.height(24.dp))
     
+    // Timeout slider - завжди видимий
     TimeoutSlider(
         timeoutSeconds = timeoutSeconds,
         onChangeTimeout = onChangeTimeout
     )
+}
+
+@Composable
+private fun TimeoutSlider(
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Network timeout: $timeoutSeconds sec",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Spacer(Modifier.height(4.dp))
+        
+        Slider(
+            value = timeoutSeconds.toFloat(),
+            onValueChange = { onChangeTimeout(it.toInt()) },
+            valueRange = 10f..600f,
+            steps = 58,
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerHoverIcon(PointerIcon.Hand),
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary
+            )
+        )
+    }
 }
 
 @Composable
@@ -877,8 +925,7 @@ private fun ConnectionStatusIndicator(status: ConnectionStatus) {
         ConnectionStatus.ErrorInvalidKey,
         ConnectionStatus.ErrorRateLimited,
         ConnectionStatus.ErrorConnectionFailed,
-        ConnectionStatus.Error,
-        -> {
+        ConnectionStatus.Error -> {
             val errorMessage = when (status) {
                 ConnectionStatus.ErrorInvalidKey -> stringResource(Res.string.settings_status_error_invalid_key)
                 ConnectionStatus.ErrorRateLimited -> stringResource(Res.string.settings_status_error_rate_limited)
@@ -907,97 +954,67 @@ private fun ConnectionStatusIndicator(status: ConnectionStatus) {
 }
 
 @Composable
-private fun TimeoutSlider(
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit,
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = "Network timeout: ${timeoutSeconds} sec",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        
-        Slider(
-            value = timeoutSeconds.toFloat(),
-            onValueChange = { onChangeTimeout(it.toInt()) },
-            valueRange = 10f..600f,
-            steps = 58,
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHoverIcon(PointerIcon.Hand),
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-}
-
-@Composable
 private fun ModelSelection(
     currentSelectedModel: SettingsModel?,
     models: List<SettingsModel>,
     onClick: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    if (models.isNotEmpty()) {
-        Box(
+    
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
+            value = currentSelectedModel?.id ?: "",
+            colors = outlineTextFieldColors(),
+            onValueChange = {},
+            readOnly = true,
+            label = {
+                Text(
+                    stringResource(Res.string.settings_model_label),
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                    imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground,
+                )
+            },
+        )
+        
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .pointerHoverIcon(PointerIcon.Hand)
+                .clickable { expanded = true },
+        )
+    }
+    
+    if (expanded) {
+        ModalBottomSheet(
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            onDismissRequest = {
+                expanded = false
+            },
         ) {
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = currentSelectedModel?.id ?: "",
-                colors = outlineTextFieldColors(),
-                onValueChange = {},
-                readOnly = true,
-                label = {
-                    Text(
-                        stringResource(Res.string.settings_model_label),
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
-                },
-                trailingIcon = {
-                    Icon(
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                        imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                },
-            )
-            // Transparent overlay to capture clicks reliably on all platforms
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .pointerHoverIcon(PointerIcon.Hand)
-                    .clickable { expanded = true },
-            )
-        }
-        if (expanded) {
-            ModalBottomSheet(
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                onDismissRequest = {
-                    expanded = false
-                },
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(300.dp),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                LazyVerticalGrid(
-                    GridCells.Adaptive(300.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(models, key = { it.id }) { model ->
-                        ModelCard(
-                            model = model,
-                            onClick = {
-                                onClick(model.id)
-                                expanded = false
-                            },
-                        )
-                    }
+                items(models, key = { it.id }) { model ->
+                    ModelCard(
+                        model = model,
+                        onClick = {
+                            onClick(model.id)
+                            expanded = false
+                        },
+                    )
                 }
             }
         }
@@ -1007,8 +1024,12 @@ private fun ModelSelection(
 @Composable
 private fun ModelCard(model: SettingsModel, onClick: () -> Unit) {
     val description = model.descriptionRes?.let { stringResource(it) } ?: model.description
+    
     Card(
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand).clip(CardDefaults.shape).clickable { onClick() },
+        modifier = Modifier
+            .pointerHoverIcon(PointerIcon.Hand)
+            .clip(CardDefaults.shape)
+            .clickable { onClick() },
         shape = CardDefaults.shape,
     ) {
         Column(
@@ -1044,4 +1065,136 @@ private fun ModelCard(model: SettingsModel, onClick: () -> Unit) {
 @Composable
 private fun ServiceSelection(services: List<Service>, currentService: Service, onChanged: (Service) -> Unit) {
     val selectedIndex = services.indexOf(currentService).coerceAtLeast(0)
-   
+    
+    PrimaryScrollableTabRow(
+        selectedTabIndex = selectedIndex,
+        edgePadding = 0.dp,
+        containerColor = MaterialTheme.colorScheme.background,
+        divider = {},
+    ) {
+        services.forEach { service ->
+            Tab(
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                selected = service == currentService,
+                onClick = { onChanged(service) },
+                text = {
+                    Text(
+                        service.displayName,
+                        color = if (service == currentService) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToolsContent(
+    tools: List<ToolInfo>,
+    onToggleTool: (String, Boolean) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.settings_tools_description),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        if (tools.isEmpty()) {
+            Text(
+                text = stringResource(Res.string.settings_tools_none_available),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        } else {
+            tools.forEach { tool ->
+                ToolItem(
+                    tool = tool,
+                    onToggle = { enabled -> onToggleTool(tool.id, enabled) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ToolItem(
+    tool: ToolInfo,
+    onToggle: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = tool.nameRes?.let { stringResource(it) } ?: tool.name,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+                text = tool.descriptionRes?.let { stringResource(it) } ?: tool.description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        Spacer(Modifier.width(16.dp))
+
+        Switch(
+            checked = tool.isEnabled,
+            onCheckedChange = onToggle,
+            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+        )
+    }
+}
+
+@Composable
+private fun GeneralContent(
+    showTopics: Boolean,
+    onToggleShowTopics: (Boolean) -> Unit,
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit
+) {
+    Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+        // Topic visibility toggle
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(Res.string.settings_show_topics),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(Res.string.settings_show_topics_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = showTopics,
+                onCheckedChange = onToggleShowTopics,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            )
+        }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp)
+
+        // Network timeout configuration
+        TimeoutSlider(
+            timeoutSeconds = timeoutSeconds,
+            onChangeTimeout = onChangeTimeout
+        )
+    }
+}
