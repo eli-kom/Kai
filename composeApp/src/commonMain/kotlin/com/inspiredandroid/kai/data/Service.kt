@@ -113,6 +113,18 @@ sealed class Service(
         modelsUrl = null,
     )
 
+    fun supportsTools(modelId: String): Boolean {
+    val disabledModels = listOf(
+        "llama3.2", 
+        "gemma2", 
+        "gemma3", // Додаємо Gemma 3 сюди
+        "phi3", 
+        "tinyllama", 
+        "qwen" // Додаємо Qwen сюди
+    )
+    return !disabledModels.any { modelId.lowercase().contains(it) }
+}
+
     companion object {
         val all: List<Service> get() = listOf(Free, OpenClaw, Gemini, XAI, OpenRouter, Groq, Nvidia, OpenAICompatible)
 
