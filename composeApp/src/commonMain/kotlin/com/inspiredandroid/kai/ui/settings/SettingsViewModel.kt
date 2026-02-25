@@ -36,7 +36,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             baseUrl = dataRepository.getBaseUrl(currentService.value),
             tools = dataRepository.getToolDefinitions(),
             showTopics = dataRepository.isShowTopicsEnabled(),
-            requestTimeout = dataRepository.getRequestTimeout(), // Завантажуємо таймаут
+            timeoutSeconds = dataRepository.getRequestTimeout(),
             onSelectTab = ::onSelectTab,
             onSelectService = ::onSelectService,
             onSelectModel = ::onSelectModel,
@@ -44,7 +44,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             onChangeBaseUrl = ::onChangeBaseUrl,
             onToggleTool = ::onToggleTool,
             onToggleShowTopics = ::onToggleShowTopics,
-            onChangeRequestTimeout = ::onChangeRequestTimeout, // Підключаємо функцію зміни
+           onChangeTimeout = ::onChangeTimeout
         ),
     )
 
@@ -119,10 +119,9 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
         _state.update { it.copy(showTopics = enabled) }
     }
 
-    // Нова функція для збереження таймауту
-    private fun onChangeRequestTimeout(timeout: Int) {
+    private fun onChangeTimeout(timeout: Int) {
         dataRepository.setRequestTimeout(timeout)
-        _state.update { it.copy(requestTimeout = timeout) }
+        _state.update { it.copy(timeoutSeconds = timeout) }
     }
 
     private fun onToggleTool(toolId: String, enabled: Boolean) {
