@@ -259,8 +259,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds: Int,
-                                onChangeTimeout: (Int) -> Unit
+                                timeoutSeconds = timeoutSeconds, 
+                                onChangeTimeout = onChangeTimeout
                             )
                         }
 
