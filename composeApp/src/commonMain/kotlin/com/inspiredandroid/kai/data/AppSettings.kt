@@ -127,6 +127,15 @@ class AppSettings(private val settings: Settings) {
         settings.putBoolean(KEY_SHOW_TOPICS, enabled)
     }
 
+    // Request timeout setting
+    fun getRequestTimeout(): Int {
+        return settings.getInt(KEY_REQUEST_TIMEOUT, 60)
+    }
+
+    fun setRequestTimeout(timeout: Int) {
+        settings.putInt(KEY_REQUEST_TIMEOUT, timeout)
+    }
+
     companion object {
         const val KEY_CURRENT_SERVICE_ID = "current_service_id"
         const val KEY_APP_OPENS = "app_opens"
@@ -134,5 +143,6 @@ class AppSettings(private val settings: Settings) {
         const val KEY_MIGRATION_COMPLETE = "migration_complete_v1"
         const val KEY_TOOL_PREFIX = "tool_enabled_"
         const val KEY_SHOW_TOPICS = "show_topics"
+        const val KEY_REQUEST_TIMEOUT = "request_timeout"
     }
 }
