@@ -33,18 +33,27 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 private val modelsWithoutToolSupport = listOf(
+    // Llama family
+    "llama3.1:8b",
     "llama3.2:1b",
     "llama3.2:3b",
-    "llama3.1:8b",
-    "gemma2",
+    "codellama",
+    
+    // Gemma family
     "gemma:2b",
     "gemma:7b",
-    "phi3:mini",
-    "tinyllama",
-    "stablelm",
-    "codellama",
+    "gemma2",
+    "gemma3",
+    
+    // Deepseek family
     "deepseek-coder:1.3b",
     "deepseek-coder:6.7b",
+    
+    // Other models
+    "phi3:mini",
+    "qwen",
+    "stablelm",
+    "tinyllama",
 )
 
 private fun supportsTools(modelId: String): Boolean = modelsWithoutToolSupport.none { pattern ->
