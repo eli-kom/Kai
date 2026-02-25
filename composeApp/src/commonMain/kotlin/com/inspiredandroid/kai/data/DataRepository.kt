@@ -50,4 +50,6 @@ interface DataRepository {
     // General settings
     fun isShowTopicsEnabled(): Boolean
     fun setShowTopicsEnabled(enabled: Boolean)
+    fun getRequestTimeout(): Int
+    fun setRequestTimeout(timeout: Int)
 }
