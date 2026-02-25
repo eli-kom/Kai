@@ -41,8 +41,8 @@ data class SettingsUiState(
     val onToggleTool: (String, Boolean) -> Unit = { _, _ -> },
     val showTopics: Boolean = true,
     val onToggleShowTopics: (Boolean) -> Unit = {},
-    val requestTimeout: Int = 60,
-    val onChangeRequestTimeout: (Int) -> Unit = {}
+    val timeoutSeconds: Int = 60, 
+    val onChangeTimeout: (Int) -> Unit = {}
 )
 
 @Immutable
