@@ -1097,16 +1097,21 @@ private fun GeneralContent(
 
         // Network timeout configuration
         Text(
-            text = "Network timeout: $timeoutSeconds sec",
-            style = MaterialTheme.typography.titleMedium
+            text = "Network timeout: ${timeoutSeconds.toInt()} sec",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface // Додаємо колір для видимості
         )
         
         Slider(
             value = timeoutSeconds.toFloat(),
             onValueChange = { onChangeTimeout(it.toInt()) },
-            valueRange = 10f..120f,
-            steps = 10,
-            modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand)
+            valueRange = 10f..600f, // Збільшуємо до 10 хвилин
+            steps = 58, // Кроки по 10 секунд
+            modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand),
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary
+            )
         )
     }
 }
