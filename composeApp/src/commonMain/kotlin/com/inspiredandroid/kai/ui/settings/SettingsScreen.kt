@@ -166,11 +166,13 @@ fun SettingsScreenContent(
             Spacer(Modifier.height(16.dp))
 
             when (uiState.currentTab) {
-                SettingsTab.General -> {
-                    GeneralContent(
-                        showTopics = uiState.showTopics,
-                        onToggleShowTopics = uiState.onToggleShowTopics,
-                    )
+             SettingsTab.General -> {
+                 GeneralContent(
+                     showTopics = uiState.showTopics,
+                    onToggleShowTopics = uiState.onToggleShowTopics,          
+                    timeoutSeconds = uiState.timeoutSeconds, 
+                    onChangeTimeout = uiState.onChangeTimeout
+                )
                 }
 
                 SettingsTab.Services -> {
@@ -1064,34 +1066,46 @@ private fun ToolItem(
 private fun GeneralContent(
     showTopics: Boolean,
     onToggleShowTopics: (Boolean) -> Unit,
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+        // Topic visibility toggle
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(Res.string.settings_show_topics),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = stringResource(Res.string.settings_show_topics_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
-
-            Spacer(Modifier.width(16.dp))
-
             Switch(
                 checked = showTopics,
                 onCheckedChange = onToggleShowTopics,
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             )
         }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp)
+
+        // Network timeout configuration
+        Text(
+            text = "Network timeout: $timeoutSeconds sec",
+            style = MaterialTheme.typography.titleMedium
+        )
+        
+        Slider(
+            value = timeoutSeconds.toFloat(),
+            onValueChange = { onChangeTimeout(it.toInt()) },
+            valueRange = 10f..120f,
+            steps = 10,
+            modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand)
+        )
     }
 }
