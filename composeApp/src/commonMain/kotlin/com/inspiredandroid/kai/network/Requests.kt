@@ -140,7 +140,7 @@ class Requests(private val appSettings: AppSettings) {
 
     // region OpenAI-compatible (unified)
 
-    suspend fun openAICompatibleChat(
+   suspend fun openAICompatibleChat(
         service: Service,
         messages: List<OpenAICompatibleChatRequestDto.Message>,
         tools: List<Tool> = emptyList(),
@@ -149,19 +149,28 @@ class Requests(private val appSettings: AppSettings) {
         val apiKey = getApiKeyOrThrow(service)
         val model = if (service == Service.Free) null else appSettings.getSelectedModelId(service)
         val url = resolveUrl(service, service.chatUrl)
-        val response: HttpResponse =
-            defaultClient.post(url) {
-                contentType(ContentType.Application.Json)
-                apiKey?.let { bearerAuth(it) }
-                customHeaders.forEach { (k, v) -> header(k, v) }
-                setBody(
-                    OpenAICompatibleChatRequestDto(
-                        messages = messages,
-                        model = model,
-                        tools = tools.map { it.toRequestTool() }.ifEmpty { null },
-                    ),
-                )
+        
+        val response: HttpResponse = defaultClient.post(url) {
+            contentType(ContentType.Application.Json)
+            apiKey?.let { bearerAuth(it) }
+            customHeaders.forEach { (k, v) -> header(k, v) }
+            
+            // Динамічний таймаут: беремо значення прямо з налаштувань під час запиту
+            timeout {
+                requestTimeoutMillis = appSettings.getRequestTimeout().seconds.inWholeMilliseconds
+                socketTimeoutMillis = appSettings.getRequestTimeout().seconds.inWholeMilliseconds
+                connectTimeoutMillis = 20_000L // 20 сек на саме з'єднання
             }
+
+            setBody(
+                OpenAICompatibleChatRequestDto(
+                    messages = messages,
+                    model = model,
+                    tools = tools.map { it.toRequestTool() }.ifEmpty { null },
+                ),
+            )
+        }
+        
         if (response.status.isSuccess()) {
             Result.success(response.body())
         } else {
@@ -172,7 +181,6 @@ class Requests(private val appSettings: AppSettings) {
     } catch (e: Exception) {
         Result.failure(OpenAICompatibleConnectionException())
     }
-
     suspend fun getOpenAICompatibleModels(service: Service): Result<OpenAICompatibleModelResponseDto> = try {
         val modelsUrl = service.modelsUrl
             ?: return Result.failure(OpenAICompatibleGenericException("Models URL not configured for ${service.displayName}"))
