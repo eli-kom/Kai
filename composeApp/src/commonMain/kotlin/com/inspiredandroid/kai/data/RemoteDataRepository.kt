@@ -593,10 +593,17 @@ class RemoteDataRepository(
         appSettings.setToolEnabled(toolId, enabled)
     }
 
-    // General settings
+   // General settings
     override fun isShowTopicsEnabled(): Boolean = appSettings.isShowTopicsEnabled()
 
     override fun setShowTopicsEnabled(enabled: Boolean) {
         appSettings.setShowTopicsEnabled(enabled)
+    }
+
+    // Request timeout implementation
+    override fun getRequestTimeout(): Int = appSettings.getRequestTimeout()
+
+    override fun setRequestTimeout(timeout: Int) {
+        appSettings.setRequestTimeout(timeout)
     }
 }
