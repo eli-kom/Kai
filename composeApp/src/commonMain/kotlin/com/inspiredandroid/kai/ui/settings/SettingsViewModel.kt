@@ -36,6 +36,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             baseUrl = dataRepository.getBaseUrl(currentService.value),
             tools = dataRepository.getToolDefinitions(),
             showTopics = dataRepository.isShowTopicsEnabled(),
+            requestTimeout = dataRepository.getRequestTimeout(), // Завантажуємо таймаут
             onSelectTab = ::onSelectTab,
             onSelectService = ::onSelectService,
             onSelectModel = ::onSelectModel,
@@ -43,6 +44,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
             onChangeBaseUrl = ::onChangeBaseUrl,
             onToggleTool = ::onToggleTool,
             onToggleShowTopics = ::onToggleShowTopics,
+            onChangeRequestTimeout = ::onChangeRequestTimeout, // Підключаємо функцію зміни
         ),
     )
 
@@ -76,9 +78,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
 
     private fun onSelectService(service: Service) {
         dataRepository.selectService(service)
-        // Update currentService FIRST to trigger flatMapLatest
         currentService.value = service
-        // THEN update _state - this ensures the flatMapLatest will pick up the new values
         _state.update {
             it.copy(
                 currentService = service,
@@ -119,9 +119,14 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
         _state.update { it.copy(showTopics = enabled) }
     }
 
+    // Нова функція для збереження таймауту
+    private fun onChangeRequestTimeout(timeout: Int) {
+        dataRepository.setRequestTimeout(timeout)
+        _state.update { it.copy(requestTimeout = timeout) }
+    }
+
     private fun onToggleTool(toolId: String, enabled: Boolean) {
         dataRepository.setToolEnabled(toolId, enabled)
-        // Update the tools list to reflect the change
         _state.update { state ->
             state.copy(
                 tools = state.tools.map { tool ->
@@ -134,7 +139,7 @@ class SettingsViewModel(private val dataRepository: DataRepository) : ViewModel(
     private fun checkConnectionDebounced(service: Service) {
         connectionCheckJob?.cancel()
         connectionCheckJob = viewModelScope.launch {
-            delay(800) // Debounce to avoid checking on every keystroke
+            delay(800)
             checkConnection(service)
         }
     }
