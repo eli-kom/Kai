@@ -26,8 +26,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -49,9 +47,6 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -77,7 +72,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -149,15 +143,7 @@ fun SettingsScreenContent(
     uiState: SettingsUiState,
     onNavigateBack: () -> Unit = {},
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .navigationBarsPadding()
-            .statusBarsPadding()
-            .imePadding(),
-        horizontalAlignment = CenterHorizontally
-    ) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).navigationBarsPadding().statusBarsPadding().imePadding(), horizontalAlignment = CenterHorizontally) {
         TopBar(onNavigateBack = onNavigateBack)
 
         SettingsTabSelector(
@@ -170,11 +156,7 @@ fun SettingsScreenContent(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-                .widthIn(max = 500.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp).widthIn(max = 500.dp),
             horizontalAlignment = CenterHorizontally,
         ) {
             Spacer(Modifier.height(16.dp))
@@ -184,8 +166,6 @@ fun SettingsScreenContent(
                     GeneralContent(
                         showTopics = uiState.showTopics,
                         onToggleShowTopics = uiState.onToggleShowTopics,
-                        timeoutSeconds = uiState.timeoutSeconds,
-                        onChangeTimeout = uiState.onChangeTimeout
                     )
                 }
 
@@ -205,8 +185,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -220,8 +198,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                                 testTag = "api_key",
                             )
                         }
@@ -236,8 +212,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -251,8 +225,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -266,8 +238,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -281,20 +251,6 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
-                            )
-                        }
-
-                        Service.OpenClaw -> {
-                            OpenClawSettings(
-                                gatewayUrl = uiState.baseUrl,
-                                onChangeGatewayUrl = uiState.onChangeBaseUrl,
-                                token = uiState.apiKey,
-                                onChangeToken = uiState.onChangeApiKey,
-                                connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = uiState.timeoutSeconds,
-                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
                     }
@@ -308,8 +264,8 @@ fun SettingsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
             Spacer(Modifier.weight(1f))
+
             BottomInfo()
         }
     }
@@ -462,7 +418,8 @@ private fun FreeSettings() {
                 onClick = {
                     uriHandler.openUri("https://schubert-simon.de")
                 },
-                Modifier.pointerHoverIcon(PointerIcon.Hand),
+                Modifier
+                    .pointerHoverIcon(PointerIcon.Hand),
             ) {
                 Text(stringResource(Res.string.settings_contact_sponsorship))
             }
@@ -480,15 +437,11 @@ private fun ServiceSettings(
     models: List<SettingsModel>,
     onSelectModel: (String) -> Unit,
     connectionStatus: ConnectionStatus,
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit,
     testTag: String? = null,
 ) {
     var apiKeyFocused by remember { mutableStateOf(false) }
-    
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
             .let { if (testTag != null) it.testTag(testTag) else it }
             .onFocusChanged { apiKeyFocused = it.isFocused },
         value = apiKey,
@@ -525,6 +478,7 @@ private fun ServiceSettings(
     Spacer(Modifier.height(8.dp))
 
     val linkColor = MaterialTheme.colorScheme.primary
+
     val copyApiKeyPromptString = stringResource(Res.string.settings_sign_in_copy_api_key_from)
     val annotatedString = remember(apiKeyUrl, apiKeyUrlDisplay) {
         buildAnnotatedString {
@@ -537,7 +491,6 @@ private fun ServiceSettings(
             }
         }
     }
-    
     Text(
         annotatedString,
         modifier = Modifier.fillMaxWidth(),
@@ -546,17 +499,9 @@ private fun ServiceSettings(
 
     Spacer(Modifier.height(16.dp))
 
-    // Model selection (visible only when connected)
-    if (connectionStatus == ConnectionStatus.Connected && models.isNotEmpty()) {
+    if (connectionStatus == ConnectionStatus.Connected) {
         ModelSelection(selectedModel, models, onSelectModel)
-        Spacer(Modifier.height(24.dp))
     }
-
-    // Timeout slider - завжди видимий
-    TimeoutSlider(
-        timeoutSeconds = timeoutSeconds,
-        onChangeTimeout = onChangeTimeout
-    )
 }
 
 @Composable
@@ -569,11 +514,8 @@ private fun OpenAICompatibleSettings(
     models: List<SettingsModel>,
     onSelectModel: (String) -> Unit,
     connectionStatus: ConnectionStatus,
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit,
 ) {
     var baseUrlFocused by remember { mutableStateOf(false) }
-    
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
         value = baseUrl,
@@ -666,7 +608,6 @@ private fun OpenAICompatibleSettings(
             }
         }
     }
-    
     Text(
         annotatedString,
         modifier = Modifier.fillMaxWidth(),
@@ -675,185 +616,8 @@ private fun OpenAICompatibleSettings(
 
     Spacer(Modifier.height(16.dp))
 
-    // Model selection (visible only when connected)
-    if (connectionStatus == ConnectionStatus.Connected && models.isNotEmpty()) {
+    if (connectionStatus == ConnectionStatus.Connected) {
         ModelSelection(selectedModel, models, onSelectModel)
-        Spacer(Modifier.height(24.dp))
-    }
-
-    // Timeout slider - завжди видимий
-    TimeoutSlider(
-        timeoutSeconds = timeoutSeconds,
-        onChangeTimeout = onChangeTimeout
-    )
-}
-
-@Composable
-private fun OpenClawSettings(
-    gatewayUrl: String,
-    onChangeGatewayUrl: (String) -> Unit,
-    token: String,
-    onChangeToken: (String) -> Unit,
-    connectionStatus: ConnectionStatus,
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit,
-) {
-    var baseUrlFocused by remember { mutableStateOf(false) }
-    
-    OutlinedTextField(
-        modifier = Modifier.fillMaxWidth().onFocusChanged { baseUrlFocused = it.isFocused },
-        value = gatewayUrl,
-        onValueChange = onChangeGatewayUrl,
-        label = {
-            Text(
-                "Gateway URL",
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        },
-        colors = outlineTextFieldColors(),
-        singleLine = true,
-        trailingIcon = if (baseUrlFocused && gatewayUrl.isNotEmpty()) {
-            {
-                IconButton(
-                    onClick = { onChangeGatewayUrl("") },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        } else {
-            null
-        },
-    )
-
-    Spacer(Modifier.height(8.dp))
-
-    var tokenFocused by remember { mutableStateOf(false) }
-    OutlinedTextField(
-        modifier = Modifier.fillMaxWidth().onFocusChanged { tokenFocused = it.isFocused },
-        value = token,
-        onValueChange = onChangeToken,
-        label = {
-            Text(
-                "Token",
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-        },
-        colors = outlineTextFieldColors(),
-        singleLine = true,
-        trailingIcon = if (tokenFocused && token.isNotEmpty()) {
-            {
-                IconButton(
-                    onClick = { onChangeToken("") },
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        } else {
-            null
-        },
-    )
-
-    Spacer(Modifier.height(8.dp))
-
-    ConnectionStatusIndicator(connectionStatus)
-
-    Spacer(Modifier.height(12.dp))
-
-    val linkColor = MaterialTheme.colorScheme.primary
-    val setupText = remember(linkColor) {
-        buildAnnotatedString {
-            append("1. Setup Tailscale (")
-            withLink(LinkAnnotation.Url(url = "https://tailscale.com")) {
-                withStyle(style = SpanStyle(color = linkColor)) {
-                    append("tailscale.com")
-                }
-            }
-            append(") on both your openclaw server and this device.\n\n")
-            append("2. Add the following to ~/.openclaw/openclaw.json to enable the HTTP chat endpoint:\n")
-        }
-    }
-    
-    Text(
-        setupText,
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-
-    Spacer(Modifier.height(8.dp))
-
-    SelectionContainer {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                text = "\"gateway\": {\n  \"http\": {\n    \"endpoints\": {\n      \"chatCompletions\": {\n        \"enabled\": true\n      }\n    }\n  }\n}",
-                modifier = Modifier.padding(12.dp),
-                style = MaterialTheme.typography.bodySmall,
-                fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-
-    Spacer(Modifier.height(8.dp))
-
-    Text(
-        text = "3. Use your server's Tailscale IP as the Gateway URL (e.g. http://<tailscale-ip>:18789).\n\n" +
-            "4. Copy your token from gateway.auth.token in ~/.openclaw/openclaw.json and paste it above.",
-        modifier = Modifier.fillMaxWidth(),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
-    
-    Spacer(Modifier.height(24.dp))
-    
-    // Timeout slider - завжди видимий
-    TimeoutSlider(
-        timeoutSeconds = timeoutSeconds,
-        onChangeTimeout = onChangeTimeout
-    )
-}
-
-@Composable
-private fun TimeoutSlider(
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "Network timeout: $timeoutSeconds sec",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        
-        Spacer(Modifier.height(4.dp))
-        
-        Slider(
-            value = timeoutSeconds.toFloat(),
-            onValueChange = { onChangeTimeout(it.toInt()) },
-            valueRange = 10f..600f,
-            steps = 58,
-            modifier = Modifier
-                .fillMaxWidth()
-                .pointerHoverIcon(PointerIcon.Hand),
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary
-            )
-        )
     }
 }
 
@@ -925,7 +689,8 @@ private fun ConnectionStatusIndicator(status: ConnectionStatus) {
         ConnectionStatus.ErrorInvalidKey,
         ConnectionStatus.ErrorRateLimited,
         ConnectionStatus.ErrorConnectionFailed,
-        ConnectionStatus.Error -> {
+        ConnectionStatus.Error,
+        -> {
             val errorMessage = when (status) {
                 ConnectionStatus.ErrorInvalidKey -> stringResource(Res.string.settings_status_error_invalid_key)
                 ConnectionStatus.ErrorRateLimited -> stringResource(Res.string.settings_status_error_rate_limited)
@@ -960,61 +725,61 @@ private fun ModelSelection(
     onClick: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = currentSelectedModel?.id ?: "",
-            colors = outlineTextFieldColors(),
-            onValueChange = {},
-            readOnly = true,
-            label = {
-                Text(
-                    stringResource(Res.string.settings_model_label),
-                    color = MaterialTheme.colorScheme.onBackground,
-                )
-            },
-            trailingIcon = {
-                Icon(
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                    imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
-                )
-            },
-        )
-        
+    if (models.isNotEmpty()) {
         Box(
-            modifier = Modifier
-                .matchParentSize()
-                .pointerHoverIcon(PointerIcon.Hand)
-                .clickable { expanded = true },
-        )
-    }
-    
-    if (expanded) {
-        ModalBottomSheet(
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            onDismissRequest = {
-                expanded = false
-            },
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(300.dp),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(models, key = { it.id }) { model ->
-                    ModelCard(
-                        model = model,
-                        onClick = {
-                            onClick(model.id)
-                            expanded = false
-                        },
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = currentSelectedModel?.id ?: "",
+                colors = outlineTextFieldColors(),
+                onValueChange = {},
+                readOnly = true,
+                label = {
+                    Text(
+                        stringResource(Res.string.settings_model_label),
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
+                },
+                trailingIcon = {
+                    Icon(
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+                        imageVector = vectorResource(Res.drawable.ic_arrow_drop_down),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                    )
+                },
+            )
+            // Transparent overlay to capture clicks reliably on all platforms
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .pointerHoverIcon(PointerIcon.Hand)
+                    .clickable { expanded = true },
+            )
+        }
+        if (expanded) {
+            ModalBottomSheet(
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                onDismissRequest = {
+                    expanded = false
+                },
+            ) {
+                LazyVerticalGrid(
+                    GridCells.Adaptive(300.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(models, key = { it.id }) { model ->
+                        ModelCard(
+                            model = model,
+                            onClick = {
+                                onClick(model.id)
+                                expanded = false
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -1024,12 +789,8 @@ private fun ModelSelection(
 @Composable
 private fun ModelCard(model: SettingsModel, onClick: () -> Unit) {
     val description = model.descriptionRes?.let { stringResource(it) } ?: model.description
-    
     Card(
-        modifier = Modifier
-            .pointerHoverIcon(PointerIcon.Hand)
-            .clip(CardDefaults.shape)
-            .clickable { onClick() },
+        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand).clip(CardDefaults.shape).clickable { onClick() },
         shape = CardDefaults.shape,
     ) {
         Column(
@@ -1065,7 +826,6 @@ private fun ModelCard(model: SettingsModel, onClick: () -> Unit) {
 @Composable
 private fun ServiceSelection(services: List<Service>, currentService: Service, onChanged: (Service) -> Unit) {
     val selectedIndex = services.indexOf(currentService).coerceAtLeast(0)
-    
     PrimaryScrollableTabRow(
         selectedTabIndex = selectedIndex,
         edgePadding = 0.dp,
@@ -1161,40 +921,34 @@ private fun ToolItem(
 private fun GeneralContent(
     showTopics: Boolean,
     onToggleShowTopics: (Boolean) -> Unit,
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit
 ) {
-    Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
-        // Topic visibility toggle
+    Column(modifier = Modifier.fillMaxWidth()) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(Res.string.settings_show_topics),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 Text(
                     text = stringResource(Res.string.settings_show_topics_description),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+
+            Spacer(Modifier.width(16.dp))
+
             Switch(
                 checked = showTopics,
                 onCheckedChange = onToggleShowTopics,
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
             )
         }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp)
-
-        // Network timeout configuration
-        TimeoutSlider(
-            timeoutSeconds = timeoutSeconds,
-            onChangeTimeout = onChangeTimeout
-        )
     }
 }
