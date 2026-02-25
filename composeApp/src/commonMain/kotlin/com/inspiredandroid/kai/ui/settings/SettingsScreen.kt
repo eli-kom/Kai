@@ -49,6 +49,7 @@ import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -56,7 +57,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -148,6 +148,8 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     uiState: SettingsUiState,
     onNavigateBack: () -> Unit = {},
+    timeoutSeconds: Int = 30, 
+    onChangeTimeout: (Int) -> Unit = {}
 ) {
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).navigationBarsPadding().statusBarsPadding().imePadding(), horizontalAlignment = CenterHorizontally) {
         TopBar(onNavigateBack = onNavigateBack)
@@ -168,13 +170,11 @@ fun SettingsScreenContent(
             Spacer(Modifier.height(16.dp))
 
             when (uiState.currentTab) {
-             SettingsTab.General -> {
-                 GeneralContent(
-                     showTopics = uiState.showTopics,
-                    onToggleShowTopics = uiState.onToggleShowTopics,          
-                    timeoutSeconds = uiState.timeoutSeconds, 
-                    onChangeTimeout = uiState.onChangeTimeout
-                )
+                SettingsTab.General -> {
+                    GeneralContent(
+                        showTopics = uiState.showTopics,
+                        onToggleShowTopics = uiState.onToggleShowTopics,
+                    )
                 }
 
                 SettingsTab.Services -> {
@@ -193,6 +193,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -206,6 +208,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                                 testTag = "api_key",
                             )
                         }
@@ -220,6 +224,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -233,6 +239,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -246,6 +254,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -259,8 +269,8 @@ fun SettingsScreenContent(
                                 models = uiState.models,
                                 onSelectModel = uiState.onSelectModel,
                                 connectionStatus = uiState.connectionStatus,
-                                timeoutSeconds = timeoutSeconds, 
-                                onChangeTimeout = onChangeTimeout
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
 
@@ -271,6 +281,8 @@ fun SettingsScreenContent(
                                 token = uiState.apiKey,
                                 onChangeToken = uiState.onChangeApiKey,
                                 connectionStatus = uiState.connectionStatus,
+                                timeoutSeconds = uiState.timeoutSeconds,
+                                onChangeTimeout = uiState.onChangeTimeout,
                             )
                         }
                     }
@@ -459,6 +471,8 @@ private fun ServiceSettings(
     models: List<SettingsModel>,
     onSelectModel: (String) -> Unit,
     connectionStatus: ConnectionStatus,
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit,
     testTag: String? = null,
 ) {
     var apiKeyFocused by remember { mutableStateOf(false) }
@@ -523,6 +537,13 @@ private fun ServiceSettings(
 
     if (connectionStatus == ConnectionStatus.Connected) {
         ModelSelection(selectedModel, models, onSelectModel)
+        
+        Spacer(Modifier.height(24.dp))
+        
+        TimeoutSlider(
+            timeoutSeconds = timeoutSeconds,
+            onChangeTimeout = onChangeTimeout
+        )
     }
 }
 
@@ -536,6 +557,8 @@ private fun OpenAICompatibleSettings(
     models: List<SettingsModel>,
     onSelectModel: (String) -> Unit,
     connectionStatus: ConnectionStatus,
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit,
 ) {
     var baseUrlFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -640,6 +663,13 @@ private fun OpenAICompatibleSettings(
 
     if (connectionStatus == ConnectionStatus.Connected) {
         ModelSelection(selectedModel, models, onSelectModel)
+        
+        Spacer(Modifier.height(24.dp))
+        
+        TimeoutSlider(
+            timeoutSeconds = timeoutSeconds,
+            onChangeTimeout = onChangeTimeout
+        )
     }
 }
 
@@ -650,6 +680,8 @@ private fun OpenClawSettings(
     token: String,
     onChangeToken: (String) -> Unit,
     connectionStatus: ConnectionStatus,
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit,
 ) {
     var baseUrlFocused by remember { mutableStateOf(false) }
     OutlinedTextField(
@@ -768,6 +800,13 @@ private fun OpenClawSettings(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
+    
+    Spacer(Modifier.height(24.dp))
+    
+    TimeoutSlider(
+        timeoutSeconds = timeoutSeconds,
+        onChangeTimeout = onChangeTimeout
+    )
 }
 
 @Composable
@@ -864,6 +903,36 @@ private fun ConnectionStatusIndicator(status: ConnectionStatus) {
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TimeoutSlider(
+    timeoutSeconds: Int,
+    onChangeTimeout: (Int) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Network timeout: ${timeoutSeconds} sec",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        
+        Slider(
+            value = timeoutSeconds.toFloat(),
+            onValueChange = { onChangeTimeout(it.toInt()) },
+            valueRange = 10f..600f,
+            steps = 58,
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerHoverIcon(PointerIcon.Hand),
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary
+            )
+        )
     }
 }
 
@@ -975,146 +1044,4 @@ private fun ModelCard(model: SettingsModel, onClick: () -> Unit) {
 @Composable
 private fun ServiceSelection(services: List<Service>, currentService: Service, onChanged: (Service) -> Unit) {
     val selectedIndex = services.indexOf(currentService).coerceAtLeast(0)
-    PrimaryScrollableTabRow(
-        selectedTabIndex = selectedIndex,
-        edgePadding = 0.dp,
-        containerColor = MaterialTheme.colorScheme.background,
-        divider = {},
-    ) {
-        services.forEach { service ->
-            Tab(
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-                selected = service == currentService,
-                onClick = { onChanged(service) },
-                text = {
-                    Text(
-                        service.displayName,
-                        color = if (service == currentService) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                    )
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun ToolsContent(
-    tools: List<ToolInfo>,
-    onToggleTool: (String, Boolean) -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(Res.string.settings_tools_description),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        if (tools.isEmpty()) {
-            Text(
-                text = stringResource(Res.string.settings_tools_none_available),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            tools.forEach { tool ->
-                ToolItem(
-                    tool = tool,
-                    onToggle = { enabled -> onToggleTool(tool.id, enabled) },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ToolItem(
-    tool: ToolInfo,
-    onToggle: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = tool.nameRes?.let { stringResource(it) } ?: tool.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-            Text(
-                text = tool.descriptionRes?.let { stringResource(it) } ?: tool.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        Switch(
-            checked = tool.isEnabled,
-            onCheckedChange = onToggle,
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-        )
-    }
-}
-
-@Composable
-private fun GeneralContent(
-    showTopics: Boolean,
-    onToggleShowTopics: (Boolean) -> Unit,
-    timeoutSeconds: Int,
-    onChangeTimeout: (Int) -> Unit
-) {
-    Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
-        // Topic visibility toggle
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(Res.string.settings_show_topics),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = stringResource(Res.string.settings_show_topics_description),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            Switch(
-                checked = showTopics,
-                onCheckedChange = onToggleShowTopics,
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-            )
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp), thickness = 0.5.dp)
-
-        // Network timeout configuration
-        Text(
-            text = "Network timeout: ${timeoutSeconds.toInt()} sec",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface // Додаємо колір для видимості
-        )
-        
-        Slider(
-            value = timeoutSeconds.toFloat(),
-            onValueChange = { onChangeTimeout(it.toInt()) },
-            valueRange = 10f..600f, // Збільшуємо до 10 хвилин
-            steps = 58, // Кроки по 10 секунд
-            modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand),
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.primary,
-                activeTrackColor = MaterialTheme.colorScheme.primary
-            )
-        )
-    }
-}
+   
